@@ -1,31 +1,102 @@
 "use client"
-
-import { reset } from '@/components/reiniciar'
 import styles from './page.module.css'
+import React, { useState } from 'react';
+import axios from 'axios';
 
 export default function Home() {
-  
+  const [status, setStatus] = useState({
+    submitted: false,
+    submitting: false,
+    info: { error: false, msg: null },
+  });
+  const [inputs, setInputs] = useState({
+    email: '',
+    message: '',
+  });
+  const handleServerResponse = (ok, msg) => {
+    if (ok) {
+      setStatus({
+        submitted: true,
+        submitting: false,
+        info: { error: false, msg: msg },
+      });
+      setInputs({
+        email: '',
+        message: '',
+      });
+    } else {
+      setStatus({
+        info: { error: true, msg: msg },
+      });
+    }
+  };
+  const handleOnChange = (e) => {
+    e.persist();
+    setInputs((prev) => ({
+      ...prev,
+      [e.target.id]: e.target.value,
+    }));
+    setStatus({
+      submitted: false,
+      submitting: false,
+      info: { error: false, msg: null },
+    });
+  };
+  const handleOnSubmit = (e) => {
+    e.preventDefault();
+    setStatus((prevStatus) => ({ ...prevStatus, submitting: true }));
+    axios({
+      method: 'POST',
+      url: 'https://formspree.io/f/xoqoedbn',
+      data: inputs,
+    })
+      .then((response) => {
+        handleServerResponse(
+          true,
+          'Thank you, your message has been submitted.',
+        );
+      })
+      .catch((error) => {
+        handleServerResponse(false, error.response.data.error);
+      });
+  };
   return (
-    <div className={styles.center}>
-      <form id="formId" action="https://docs.google.com/forms/u/3/d/e/1FAIpQLScmCfYptBZk8VUjrXUk3qQ16TP-2-oHN6aT4DqeBzxxailBEw/formResponse" method="post">
-        <div className={styles.inputGroup}>
-          <label className={styles.inputLabel} htmlFor='name'>Nome</label>
-          <input type='text' id='name' name='entry.184592984' className={styles.inputField} required/>  
-        </div>
-        <div className={styles.inputGroup}>
-          <label className={styles.inputLabel} htmlFor='email'>Email</label>
-          <input type='text' id='email' name='entry.1775019266' className={styles.inputField} required/>
-        </div>
-        <div className={styles.inputGroup}>
-          <label className={styles.inputLabel} htmlFor='subject'>Assunto</label>
-          <input type='text' id='subject' name='entry.1874650118' className={styles.inputField} required/>
-        </div>
-        <div className={styles.inputGroup}>
-          <label className={styles.inputLabel} htmlFor='message'>Mensagem</label>
-          <textarea type='text-area' id='message' name='entry.1658217200' className={styles.inputFieldMessage} required/>
-        </div>
-        <button type='submit' className={styles.botaoForm} onClick={reset}>Enviar</button>
-      </form>
-    </div>
-  )
-} 
+    <main>
+      <h1>React and Formspree</h1>
+      <hr />
+      <div className={styles.center}>
+        <form onSubmit={handleOnSubmit}>
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            name="_replyto"
+            onChange={handleOnChange}
+            required
+            value={inputs.email}
+          />
+          <label htmlFor="message">Message</label>
+          <textarea
+            id="message"
+            name="message"
+            onChange={handleOnChange}
+            required
+            value={inputs.message}
+          />
+          <button type="submit" disabled={status.submitting}>
+            {!status.submitting
+              ? !status.submitted
+                ? 'Submit'
+                : 'Submitted'
+              : 'Submitting...'}
+          </button>
+        </form>
+      </div>
+      
+      {status.info.error && (
+        <div className="error">Error: {status.info.msg}</div>
+      )}
+      {!status.info.error && status.info.msg && <p>{status.info.msg}</p>}
+    </main>
+  );
+};
