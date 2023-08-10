@@ -10,7 +10,9 @@ export default function Home() {
     info: { error: false, msg: null },
   });
   const [inputs, setInputs] = useState({
+    name: '',
     email: '',
+    subject: '',
     message: '',
   });
   const handleServerResponse = (ok, msg) => {
@@ -21,7 +23,9 @@ export default function Home() {
         info: { error: false, msg: msg },
       });
       setInputs({
+        name: '',
         email: '',
+        subject: '',
         message: '',
       });
     } else {
@@ -66,6 +70,15 @@ export default function Home() {
       <hr />
       <div className={styles.center}>
         <form onSubmit={handleOnSubmit}>
+          <label htmlFor="name">Nome</label>
+          <input
+            id="name"
+            type="text"
+            name="name"
+            onChange={handleOnChange}
+            required
+            value={inputs.name}
+          />
           <label htmlFor="email">Email</label>
           <input
             id="email"
@@ -75,7 +88,16 @@ export default function Home() {
             required
             value={inputs.email}
           />
-          <label htmlFor="message">Message</label>
+          <label htmlFor="subject">Assunto</label>
+          <input
+            id="subject"
+            type="text"
+            name="subject"
+            onChange={handleOnChange}
+            required
+            value={inputs.subject}
+          />
+          <label htmlFor="message">Menssagem</label>
           <textarea
             id="message"
             name="message"
